@@ -280,7 +280,7 @@ const fetchData = async () => {
 
 const handlePageChange = page => {
   currentPage.value = page
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  
 }
 
 watch([selectedCategory, sortBy], () => (currentPage.value = 1))
