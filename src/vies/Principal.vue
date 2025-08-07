@@ -12,31 +12,10 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Estadísticas -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
-          <Package class="w-6 h-6 text-blue-500 mr-3" />
-          <div>
-            <p class="text-sm text-gray-500">Total productos</p>
-            <p class="text-lg font-semibold text-gray-900">{{ totalProducts }}</p>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
-          <Search class="w-6 h-6 text-green-500 mr-3" />
-          <div>
-            <p class="text-sm text-gray-500">Categorías únicas</p>
-            <p class="text-lg font-semibold text-gray-900">{{ uniqueCategories }}</p>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
-          <DollarSign class="w-6 h-6 text-yellow-500 mr-3" />
-          <div>
-            <p class="text-sm text-gray-500">Precio promedio USD</p>
-            <p class="text-lg font-semibold text-gray-900">
-              {{ formatPrice(avgPriceUSD, 'USD',exchangeRate) }}
-            </p>
-          </div>
-        </div>
-      </div>
+      <Estadisticas :avgPriceUSD="avgPriceUSD"
+      :exchangeRate="exchangeRate"
+      :uniqueCategories="uniqueCategories"
+      :totalProducts="totalProducts"/>
 
       <!-- Filtros -->
       <div class="bg-white rounded-lg shadow-lg p-5 mb-8">
@@ -171,120 +150,143 @@
 </template>
 
 <script setup>
-//importaciones
-import { ref, computed, onMounted, watch } from 'vue'
-import { Search, DollarSign, AlertCircle, Package } from 'lucide-vue-next'
-import ProductCard from '../components/ProductCard.vue'
-import Pagination from '../components/Pagination.vue'
-import axios from 'axios'
-import { formatPrice,formatCategory} from '../assets/funciones'
+import { ref, computed, onMounted, watch } from 'vue';
+import { DollarSign, AlertCircle, Package } from 'lucide-vue-next';
+import ProductCard from '../components/ProductCard.vue';
+import Pagination from '../components/Pagination.vue';
+import Estadisticas from '../components/Estadisticas.vue';
+import axios from 'axios';
+import { formatPrice, formatCategory,useLocalStorage } from '../assets/funciones';
 
-// Estados reactivos
-const products = ref([])
-const exchangeRate = ref(null)
-const loading = ref(true)
-const error = ref(null)
-const currentPage = ref(1)
-const selectedCategory = ref('')
-const sortBy = ref('title')
 
-// Limpiar filtros
-const clearFilters = () => {
-  selectedCategory.value = ''
-  sortBy.value = 'title'
-}
+// --- Estado Reactivo ---
+const products = ref([]);
+const exchangeRate = ref(null);
+const loading = ref(true);
+const error = ref(null);
+const currentPage = ref(1);
 
-// Computed
-const categories = computed(() => [...new Set(products.value.map(p => p.category))])
-//aplicacion de los filtros a los productos
-const filteredProducts = computed(() => {
-  let list = products.value.slice()
-  //aplicar filtro de categoria 
-  if (selectedCategory.value) {
-    list = list.filter(p => p.category === selectedCategory.value)
+// Variables persistentes en LocalStorage para los filtros
+const userData = useLocalStorage('filtros', { 
+  selectedCategory: '', 
+  sortBy: 'title' 
+});
+
+// Alias para los valores del LocalStorage
+const selectedCategory = computed({
+  get: () => userData.value.selectedCategory,
+  set: (value) => {
+    userData.value.selectedCategory = value;
   }
-  //aplicar filtro de precios
+});
+
+const sortBy = computed({
+  get: () => userData.value.sortBy,
+  set: (value) => {
+    userData.value.sortBy = value;
+  }
+});
+
+// --- Computed Properties ---
+const categories = computed(() => [...new Set(products.value.map(p => p.category))]);
+
+const filteredProducts = computed(() => {
+  let list = products.value.slice();
+
+  // Aplicar filtro de categoría
+  if (selectedCategory.value) {
+    list = list.filter(p => p.category === selectedCategory.value);
+  }
+
+  // Aplicar filtro de precio
   switch (sortBy.value) {
     case 'price-0-25':
-      list = list.filter(p => p.price <= 25)
-      break
+      list = list.filter(p => p.price <= 25);
+      break;
     case 'price-25-50':
-      list = list.filter(p => p.price > 25 && p.price <= 50)
-      break
+      list = list.filter(p => p.price > 25 && p.price <= 50);
+      break;
     case 'price-50-100':
-      list = list.filter(p => p.price > 50 && p.price <= 100)
-      break
+      list = list.filter(p => p.price > 50 && p.price <= 100);
+      break;
     case 'price-100-200':
-      list = list.filter(p => p.price > 100 && p.price <= 200)
-      break
+      list = list.filter(p => p.price > 100 && p.price <= 200);
+      break;
     case 'price-200-plus':
-      list = list.filter(p => p.price > 200)
-      break
+      list = list.filter(p => p.price > 200);
+      break;
   }
 
-  if (['title','price-asc','price-desc'].includes(sortBy.value)) {
+  // Ordenar por título o precio
+  if (['title', 'price-asc', 'price-desc'].includes(sortBy.value)) {
     list.sort((a, b) => {
-      if (sortBy.value === 'title') return a.title.localeCompare(b.title)
-      if (sortBy.value === 'price-asc') return a.price - b.price
-      return b.price - a.price
-    })
+      if (sortBy.value === 'title') return a.title.localeCompare(b.title);
+      if (sortBy.value === 'price-asc') return a.price - b.price;
+      return b.price - a.price;
+    });
   }
 
-  return list
-})
+  return list;
+});
 
-const totalPages = computed(() => Math.ceil(filteredProducts.value.length / 5))
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / 5));
 const paginatedProducts = computed(() => {
-  const start = (currentPage.value - 1) * 5
-  return filteredProducts.value.slice(start, start + 5)
-})
+  const start = (currentPage.value - 1) * 5;
+  return filteredProducts.value.slice(start, start + 5);
+});
 
 // Estadísticas
-const totalProducts = computed(() => filteredProducts.value.length)
-const uniqueCategories = computed(() => new Set(filteredProducts.value.map(p => p.category)).size)
+const totalProducts = computed(() => filteredProducts.value.length);
+const uniqueCategories = computed(() => new Set(filteredProducts.value.map(p => p.category)).size);
 const avgPriceUSD = computed(() => {
-  if (!filteredProducts.value.length) return 0
-  return filteredProducts.value.reduce((sum, p) => sum + p.price, 0) / filteredProducts.value.length
-})
+  if (!filteredProducts.value.length) return 0;
+  return filteredProducts.value.reduce((sum, p) => sum + p.price, 0) / filteredProducts.value.length;
+});
 
-
-
-// Llamada de las APIS
-//llamada de los productos
-const fetchProducts = async () => {
-  const res = await axios.get('https://fakestoreapi.com/products')
-  if (res.status !== 200) throw new Error('Error al cargar productos')
-  products.value = res.data
-}
-//llamada de tasa de cambio 
-const fetchExchangeRate = async () => {
-  const res = await axios.get('https://pydolarve.org/api/v1/dollar?page=bcv')
-  if (res.status !== 200) throw new Error('Error al cargar tasa')
-  const rate = res.data.monitors.usd  .price 
-  if (!rate) throw new Error('Tasa no encontrada')
-  exchangeRate.value = parseFloat(rate)
-}
-
-const fetchData = async () => {
-  document.title = 'Tablero de Control'
-  loading.value = true
-  error.value = null
-  try {
-    await Promise.all([fetchProducts(), fetchExchangeRate()])
-  } catch (err) {
-    error.value = err.message
-  } finally {
-    loading.value = false
-  }
-}
+// --- Funciones ---
+const clearFilters = () => {
+  selectedCategory.value = '';
+  sortBy.value = 'title';
+};
 
 const handlePageChange = page => {
-  currentPage.value = page
-  
-}
+  currentPage.value = page;
+};
 
-watch([selectedCategory, sortBy], () => (currentPage.value = 1))
-onMounted(fetchData)
+// --- Llamada a las APIs ---
+const fetchProducts = async () => {
+  const res = await axios.get('https://fakestoreapi.com/products');
+  if (res.status !== 200) throw new Error('Error al cargar productos');
+  products.value = res.data;
+};
+
+const fetchExchangeRate = async () => {
+  const res = await axios.get('https://pydolarve.org/api/v1/dollar?page=bcv');
+  if (res.status !== 200) throw new Error('Error al cargar la tasa');
+  const rate = res.data.monitors.usd.price;
+  if (!rate) throw new Error('Tasa no encontrada');
+  exchangeRate.value = parseFloat(rate);
+};
+
+const fetchData = async () => {
+  document.title = 'Tablero de Control';
+  loading.value = true;
+  error.value = null;
+  try {
+    await Promise.all([fetchProducts(), fetchExchangeRate()]);
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    loading.value = false;
+  }
+};
+
+// --- Ciclo de Vida y Watchers ---
+onMounted(fetchData);
+
+watch([selectedCategory, sortBy], () => {
+  currentPage.value = 1;
+});
 </script>
 
 <style scoped>
