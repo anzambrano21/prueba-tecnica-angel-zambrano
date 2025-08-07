@@ -17,30 +17,27 @@ Para empezar a trabajar con el proyecto, sigue estos pasos:
 
 1.  **Clona el repositorio:**
     ```bash
-    git clone [URL_DEL_REPOSITORIO]
+    git clone https://github.com/anzambrano21/prueba-tecnica-angel-zambrano.git
     ```
 
 2.  **Navega al directorio del proyecto:**
     ```bash
-    cd [nombre-del-directorio-del-proyecto]
+    cd prueba-tecnica-angel-zambrano
     ```
 
 3.  **Instala las dependencias:**
     ```bash
     npm install
-    # o, si prefieres usar yarn
-    # yarn
+
     ```
 
 ---
 
-## Scripts Disponibles
 
-Una vez que las dependencias estén instaladas, puedes usar los siguientes comandos para ejecutar el proyecto:
 
 ### Compilar y ejecutar en modo de desarrollo
 
 ```bash
 npm run dev
-# o
-# yarn dev
+
+```
