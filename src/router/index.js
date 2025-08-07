@@ -1,11 +1,11 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 
-import AboutView from '../vies/HomeView.vue'
+import AboutView from '../vies/Principal.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: AboutView },
-  { path: '/about', name: 'About', component: AboutView }
+  
 ]
 
 const router = createRouter({
