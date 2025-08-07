@@ -4,7 +4,7 @@
     <h1
       class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8
              text-center font-extrabold
-             text-3xl sm:text-4xl lg:text-5xl
+              text-3xl sm:text-4xl lg:text-3xl
              mb-6"
     >
       TABLERO DE CONTROL
@@ -17,21 +17,21 @@
           <Package class="w-6 h-6 text-blue-500 mr-3" />
           <div>
             <p class="text-sm text-gray-500">Total productos</p>
-            <p class="text-2xl font-semibold text-gray-900">{{ totalProducts }}</p>
+            <p class="text-lg font-semibold text-gray-900">{{ totalProducts }}</p>
           </div>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
           <Search class="w-6 h-6 text-green-500 mr-3" />
           <div>
             <p class="text-sm text-gray-500">Categorías únicas</p>
-            <p class="text-2xl font-semibold text-gray-900">{{ uniqueCategories }}</p>
+            <p class="text-lg font-semibold text-gray-900">{{ uniqueCategories }}</p>
           </div>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
           <DollarSign class="w-6 h-6 text-yellow-500 mr-3" />
           <div>
             <p class="text-sm text-gray-500">Precio promedio USD</p>
-            <p class="text-2xl font-semibold text-gray-900">
+            <p class="text-lg font-semibold text-gray-900">
               {{ formatPrice(avgPriceUSD, 'USD') }}
             </p>
           </div>
@@ -39,7 +39,7 @@
       </div>
 
       <!-- Filtros -->
-      <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+      <div class="bg-white rounded-lg shadow-lg p-5 mb-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <!-- Categoría -->
           <div>
@@ -298,17 +298,29 @@ onMounted(fetchData)
   }
 }
 
+
 /* Animaciones de transición para productos */
-.list-enter-active,
-.list-leave-active {
-  transition: all 5s ease;
+.list-enter-active {
+  /* Animación para los elementos que entran */
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  
+   transition-delay: 0.1s; 
 }
-.list-enter-from,
+
+.list-leave-active {
+  /* Animación para los elementos que salen */
+  transition: opacity 0.5s ease;
+
+}
+
+.list-enter-from {
+  opacity: 0;
+  
+}
+
 .list-leave-to {
   opacity: 0;
-  transform: translateY(20px);
-}
-.list-leave-active {
-  position: absolute;
+ 
+  transform: scale(0.95); 
 }
 </style>
