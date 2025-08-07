@@ -19,7 +19,7 @@ Sigue estos pasos para poner el proyecto en marcha en tu entorno local:
 
 1.  **Clona el repositorio:**
     ```bash
-    git clone [https://github.com/anzambrano21/prueba-tecnica-angel-zambrano.git](https://github.com/anzambrano21/prueba-tecnica-angel-zambrano.git)
+    git clone https://github.com/anzambrano21/prueba-tecnica-angel-zambrano.git
     ```
 
 2.  **Navega al directorio del proyecto:**
