@@ -219,7 +219,6 @@ const filteredProducts = computed(() => {
   return filtered
 })
 
-// pagination
 const totalPages = computed(() => Math.ceil(filteredProducts.value.length / 5))
 const paginatedProducts = computed(() => {
   const start = (currentPage.value - 1) * 5
