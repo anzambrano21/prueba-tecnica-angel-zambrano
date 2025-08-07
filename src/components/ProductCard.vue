@@ -35,7 +35,7 @@
           <span class="text-lg font-bold text-blue-600">{{ formatPrice(product.price, 'USD') }}</span>
         </div>
         <div class="text-sm text-gray-600">
-          {{ formatPrice(product.price, 'VES') }}
+          {{ formatPrice(product.price, 'VES',exchangeRate) }}
         </div>
       </div>
     </div>
@@ -43,9 +43,12 @@
 </template>
 
 <script setup>
+//importaciones
 import { ref } from 'vue'
 import { Package } from 'lucide-vue-next'
+import { formatPrice,formatCategory} from '../assets/funciones'
 
+//Propiedades
 const props = defineProps({
   product: {
     type: Object,
@@ -60,25 +63,7 @@ const props = defineProps({
 const imageLoaded = ref(false)
 const imageError = ref(false)
 
-const formatPrice = (price, currency = 'USD') => {
-  if (currency === 'VES' && props.exchangeRate) {
-    const vesPrice = price * props.exchangeRate
-    return new Intl.NumberFormat('es-VE', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(vesPrice) + ' Bs'
-  }
-  return new Intl.NumberFormat('es-VE', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(price)
-}
 
-const formatCategory = (category) => {
-  return category.split(' ').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(' ')
-}
 </script>
 
 <style scoped>

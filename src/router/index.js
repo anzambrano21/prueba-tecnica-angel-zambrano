@@ -2,7 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import AboutView from '../vies/Principal.vue'
-
+//Definicion de las rutas del proyecto vue con historial
 const routes = [
   { path: '/', name: 'Home', component: AboutView },
   

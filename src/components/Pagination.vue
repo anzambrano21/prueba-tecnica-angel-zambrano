@@ -58,8 +58,9 @@
   </template>
   
   <script setup>
+  //importaciones
   import { computed } from 'vue'
-  
+  //propiedaades del componente
   const props = defineProps({
     currentPage: {
       type: Number,

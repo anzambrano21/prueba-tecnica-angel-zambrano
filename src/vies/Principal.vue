@@ -32,7 +32,7 @@
           <div>
             <p class="text-sm text-gray-500">Precio promedio USD</p>
             <p class="text-lg font-semibold text-gray-900">
-              {{ formatPrice(avgPriceUSD, 'USD') }}
+              {{ formatPrice(avgPriceUSD, 'USD',exchangeRate) }}
             </p>
           </div>
         </div>
@@ -108,7 +108,7 @@
           <DollarSign class="w-5 h-5 text-green-600 mr-2" />
           <span class="text-sm text-green-800">
             Tasa BCV:
-            <strong>{{ formatPrice(exchangeRate, 'VES') }}</strong> por USD
+            <strong>{{ Intl.NumberFormat('es-VE',{ minimumFractionDigits:2, maximumFractionDigits:2 }).format(exchangeRate) + ' Bs'}}</strong> por USD
           </span>
         </div>
       </div>
@@ -171,11 +171,13 @@
 </template>
 
 <script setup>
+//importaciones
 import { ref, computed, onMounted, watch } from 'vue'
 import { Search, DollarSign, AlertCircle, Package } from 'lucide-vue-next'
 import ProductCard from '../components/ProductCard.vue'
 import Pagination from '../components/Pagination.vue'
 import axios from 'axios'
+import { formatPrice,formatCategory} from '../assets/funciones'
 
 // Estados reactivos
 const products = ref([])
@@ -194,13 +196,14 @@ const clearFilters = () => {
 
 // Computed
 const categories = computed(() => [...new Set(products.value.map(p => p.category))])
+//aplicacion de los filtros a los productos
 const filteredProducts = computed(() => {
   let list = products.value.slice()
-
+  //aplicar filtro de categoria 
   if (selectedCategory.value) {
     list = list.filter(p => p.category === selectedCategory.value)
   }
-
+  //aplicar filtro de precios
   switch (sortBy.value) {
     case 'price-0-25':
       list = list.filter(p => p.price <= 25)
@@ -244,27 +247,20 @@ const avgPriceUSD = computed(() => {
   return filteredProducts.value.reduce((sum, p) => sum + p.price, 0) / filteredProducts.value.length
 })
 
-// Helpers de formato
-const formatPrice = (value, currency = 'USD') => {
-  if (currency === 'VES' && exchangeRate.value) {
-    const ves = value * exchangeRate.value
-    return new Intl.NumberFormat('es-VE',{ minimumFractionDigits:2, maximumFractionDigits:2 }).format(ves) + ' Bs'
-  }
-  return new Intl.NumberFormat('en-US',{ style:'currency', currency:'USD' }).format(value)
-}
-const formatCategory = cat => cat.split(' ').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ')
 
-// API Calls
+
+// Llamada de las APIS
+//llamada de los productos
 const fetchProducts = async () => {
   const res = await axios.get('https://fakestoreapi.com/products')
   if (res.status !== 200) throw new Error('Error al cargar productos')
   products.value = res.data
 }
-
+//llamada de tasa de cambio 
 const fetchExchangeRate = async () => {
   const res = await axios.get('https://pydolarve.org/api/v1/dollar?page=bcv')
   if (res.status !== 200) throw new Error('Error al cargar tasa')
-  const rate = res.data.monitors?.usd?.price 
+  const rate = res.data.monitors.usd  .price 
   if (!rate) throw new Error('Tasa no encontrada')
   exchangeRate.value = parseFloat(rate)
 }
@@ -300,8 +296,10 @@ onMounted(fetchData)
 
 
 /* Animaciones de transición para productos */
-.list-enter-active {
+
   /* Animación para los elementos que entran */
+.list-enter-active {
+
   transition: opacity 0.5s ease, transform 0.5s ease;
   
    transition-delay: 0.5s; 

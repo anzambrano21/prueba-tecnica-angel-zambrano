@@ -2,7 +2,7 @@
 
 </script>
 
-<!-- src/App.vue -->
+<!--llamada de rutas-->
 <template>
   <div>
     
