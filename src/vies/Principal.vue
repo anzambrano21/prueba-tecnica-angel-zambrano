@@ -304,7 +304,7 @@ onMounted(fetchData)
   /* Animación para los elementos que entran */
   transition: opacity 0.5s ease, transform 0.5s ease;
   
-   transition-delay: 0.1s; 
+   transition-delay: 0.5s; 
 }
 
 .list-leave-active {
