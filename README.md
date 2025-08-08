@@ -54,4 +54,4 @@ A continuación, se explican algunas de las decisiones clave tomadas durante el 
 
 ---
 
-## Estructura del Proyecto
+
